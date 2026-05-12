@@ -1,0 +1,31 @@
+{% extends 'store/base.html' %}
+{% block title %}Style Blog — StyleHub{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h2>The StyleHub Blog</h2>
+  <p>Fashion tips, trend guides, and wardrobe advice from our team.</p>
+</section>
+
+<section class="blog-section section">
+  {% if posts %}
+  <div class="blog-grid">
+    {% for post in posts %}
+    <article class="blog-card">
+      <a href="{% url 'blog_detail' post.slug %}" class="blog-img-link">
+        <img src="{{ post.image_url }}" alt="{{ post.title }}" loading="lazy">
+        <span class="blog-date">{{ post.published_at|date:"d M Y" }}</span>
+      </a>
+      <div class="blog-body">
+        <span class="blog-author">By {{ post.author }}</span>
+        <h2><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h2>
+        <p>{{ post.excerpt }}</p>
+        <a href="{% url 'blog_detail' post.slug %}" class="read-more">Read Article <i class='bx bx-right-arrow-alt'></i></a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><h3>No posts yet</h3><p>Check back soon.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

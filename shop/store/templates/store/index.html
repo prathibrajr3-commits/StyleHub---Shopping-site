@@ -1,0 +1,131 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}StyleHub — Modern Fashion for Every Occasion{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-tag">New Collection 2025</span>
+    <h1>Dress for the<br><em>life you want</em></h1>
+    <p>Thoughtfully made clothing — premium fabrics, contemporary cuts, and prices that make sense.</p>
+    <div class="hero-cta">
+      <a href="{% url 'shop' %}" class="btn-primary btn-lg">Shop Now</a>
+      <a href="{% url 'shop' %}?is_new_arrival=1" class="btn-outline btn-lg">New Arrivals</a>
+    </div>
+    <div class="hero-stats">
+      <div><strong>15K+</strong><span>Happy Customers</span></div>
+      <div><strong>500+</strong><span>Products</span></div>
+      <div><strong>Free</strong><span>Shipping ₹500+</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-wrap">
+      <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=700&q=80" alt="Fashion collection" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- Features strip -->
+<section class="features-strip">
+  <div class="feature-item">
+    <i class='bx bx-package'></i>
+    <div><strong>Free Shipping</strong><span>On orders above ₹500</span></div>
+  </div>
+  <div class="feature-item">
+    <i class='bx bx-refresh'></i>
+    <div><strong>Easy Returns</strong><span>7-day hassle-free policy</span></div>
+  </div>
+  <div class="feature-item">
+    <i class='bx bx-shield-check'></i>
+    <div><strong>Secure Payment</strong><span>100% encrypted checkout</span></div>
+  </div>
+  <div class="feature-item">
+    <i class='bx bx-support'></i>
+    <div><strong>24/7 Support</strong><span>We're always here</span></div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="section categories-section">
+  <div class="section-header">
+    <h2>Shop by Category</h2>
+    <a href="{% url 'shop' %}" class="view-all">View All <i class='bx bx-right-arrow-alt'></i></a>
+  </div>
+  <div class="categories-grid">
+    {% for cat in categories %}
+    <a href="{% url 'shop' %}?category={{ cat.slug }}" class="cat-card">
+      <div class="cat-icon"><i class='bx bx-shopping-bag'></i></div>
+      <span>{{ cat.name }}</span>
+    </a>
+    {% empty %}
+    <a href="{% url 'shop' %}?category=shirts" class="cat-card"><div class="cat-icon"><i class='bx bx-shirt'></i></div><span>Shirts & Tops</span></a>
+    <a href="{% url 'shop' %}?category=pants" class="cat-card"><div class="cat-icon"><i class='bx bx-run'></i></div><span>Pants</span></a>
+    <a href="{% url 'shop' %}?category=tshirts" class="cat-card"><div class="cat-icon"><i class='bx bx-hive'></i></div><span>T-Shirts</span></a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="section products-section" id="featured">
+  <div class="section-header">
+    <h2>Featured Products</h2>
+    <a href="{% url 'shop' %}" class="view-all">View All <i class='bx bx-right-arrow-alt'></i></a>
+  </div>
+  <div class="products-grid">
+    {% for product in featured_products %}
+    {% include 'store/partials/product_card.html' %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Banner -->
+<section class="promo-banner">
+  <div class="promo-content">
+    <span class="promo-tag">Limited Time</span>
+    <h2>Up to <span class="accent">70% Off</span></h2>
+    <p>Seasonal sale on all T-Shirts &amp; selected accessories. Don't miss out.</p>
+    <a href="{% url 'shop' %}" class="btn-primary">Explore Sale</a>
+  </div>
+</section>
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="section products-section" id="new-arrivals">
+  <div class="section-header">
+    <h2>New Arrivals</h2>
+    <a href="{% url 'shop' %}?sort=newest" class="view-all">View All <i class='bx bx-right-arrow-alt'></i></a>
+  </div>
+  <div class="products-grid">
+    {% for product in new_arrivals %}
+    {% include 'store/partials/product_card.html' %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Split banners -->
+<section class="split-banners">
+  <div class="split-banner split-banner--1">
+    <div class="split-text">
+      <h3>Crazy Deals</h3>
+      <h2>Buy 1 Get 1 Free</h2>
+      <p>On selected shirts this week only.</p>
+      <a href="{% url 'shop' %}?category=shirts" class="btn-outline btn-white">Shop Shirts</a>
+    </div>
+  </div>
+  <div class="split-banner split-banner--2">
+    <div class="split-text">
+      <h3>Spring / Summer 2025</h3>
+      <h2>New Collection</h2>
+      <p>Fresh styles dropping every week.</p>
+      <a href="{% url 'shop' %}?sort=newest" class="btn-outline btn-white">See Collection</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

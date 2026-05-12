@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}StyleHub — Modern Fashion{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}Shop the latest fashion at StyleHub — shirts, pants, tees and more.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'store/css/main.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+<!-- Header -->
+<header id="header">
+  <a href="{% url 'home' %}" class="logo-link">
+    <span class="logo-text">Style<span class="logo-accent">Hub</span></span>
+  </a>
+  <nav>
+    <ul id="navbar">
+      <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a></li>
+      <li><a href="{% url 'shop' %}" {% if request.resolver_match.url_name == 'shop' %}class="active"{% endif %}>Shop</a></li>
+      <li><a href="{% url 'blog' %}" {% if request.resolver_match.url_name == 'blog' %}class="active"{% endif %}>Blog</a></li>
+      <li><a href="{% url 'about' %}" {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %}>About</a></li>
+      <li><a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Contact</a></li>
+      <li>
+        <a href="{% url 'cart' %}" class="cart-icon-link {% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+          <i class='bx bx-shopping-bag'></i>
+          <span class="cart-badge" id="cart-badge" {% if not cart_count %}style="display:none"{% endif %}>{{ cart_count }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><i class='bx bx-menu'></i></button>
+</header>
+
+{% if messages %}
+<div class="django-messages">
+  {% for message in messages %}
+  <div class="django-msg django-msg--{{ message.tags }}">
+    {{ message }}
+    <button onclick="this.parentElement.remove()">×</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Newsletter -->
+<section class="newsletter">
+  <div class="newsletter-text">
+    <h4>Stay in the Loop</h4>
+    <p>Get early access to new arrivals, exclusive offers, and style tips delivered weekly.</p>
+  </div>
+  <form class="newsletter-form" id="newsletter-form" onsubmit="subscribeNewsletter(event)">
+    {% csrf_token %}
+    <input type="email" id="newsletter-email" placeholder="Your email address" required>
+    <button type="submit" class="btn-primary">Subscribe</button>
+  </form>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col footer-brand">
+      <span class="logo-text footer-logo">Style<span class="logo-accent">Hub</span></span>
+      <p>Modern fashion for modern people. Quality clothing that looks good, feels good, and lasts.</p>
+      <address>
+        <p><i class='bx bx-map'></i> 42 Fashion Street, Mumbai 400001</p>
+        <p><i class='bx bx-phone'></i> +91 98765 43210</p>
+        <p><i class='bx bx-time'></i> Mon–Sat, 10:00–18:00</p>
+      </address>
+      <div class="social-links">
+        <a href="#" aria-label="Instagram"><i class='bx bxl-instagram'></i></a>
+        <a href="#" aria-label="Facebook"><i class='bx bxl-facebook'></i></a>
+        <a href="#" aria-label="Pinterest"><i class='bx bxl-pinterest'></i></a>
+        <a href="#" aria-label="YouTube"><i class='bx bxl-youtube'></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="{% url 'shop' %}?category=shirts">Men's Shirts</a>
+      <a href="{% url 'shop' %}?category=shirts&gender=women">Women's Tops</a>
+      <a href="{% url 'shop' %}?category=pants">Trousers & Pants</a>
+      <a href="{% url 'shop' %}?category=tshirts">T-Shirts</a>
+      <a href="{% url 'shop' %}?sort=newest">New Arrivals</a>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <a href="{% url 'about' %}">About Us</a>
+      <a href="{% url 'contact' %}">Contact</a>
+      <a href="#">Shipping Policy</a>
+      <a href="#">Returns & Exchanges</a>
+      <a href="#">Size Guide</a>
+      <a href="#">FAQs</a>
+    </div>
+    <div class="footer-col">
+      <h4>My Account</h4>
+      <a href="{% url 'cart' %}">View Cart</a>
+      <a href="#">Track My Order</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms & Conditions</a>
+      <div class="payment-icons">
+        <span class="payment-badge">VISA</span>
+        <span class="payment-badge">Mastercard</span>
+        <span class="payment-badge">UPI</span>
+        <span class="payment-badge">PayTM</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 StyleHub. All rights reserved. Built with Django.</p>
+  </div>
+</footer>
+
+<script src="{% static 'store/js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

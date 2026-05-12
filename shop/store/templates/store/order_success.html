@@ -1,0 +1,37 @@
+{% extends 'store/base.html' %}
+{% block title %}Order Confirmed — StyleHub{% endblock %}
+{% block content %}
+<div class="order-success">
+  <div class="success-icon"><i class='bx bx-check-circle'></i></div>
+  <h1>Order Confirmed!</h1>
+  <p class="order-num">Order <strong>#{{ order.order_number }}</strong></p>
+  <p>Thank you, {{ order.first_name }}! Your order has been placed successfully. We'll send a confirmation to <strong>{{ order.email }}</strong>.</p>
+
+  <div class="order-details-box">
+    <h3>Order Details</h3>
+    <div class="order-info-grid">
+      <div><label>Order Number</label><span>#{{ order.order_number }}</span></div>
+      <div><label>Status</label><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></div>
+      <div><label>Payment</label><span>{{ order.get_payment_method_display }}</span></div>
+      <div><label>Total</label><span>₹{{ order.total }}</span></div>
+    </div>
+
+    <h4>Shipping To</h4>
+    <p>{{ order.first_name }} {{ order.last_name }}<br>
+    {{ order.address }}<br>{{ order.city }}, {{ order.state }} — {{ order.pincode }}</p>
+
+    <h4>Items Ordered</h4>
+    {% for item in order.items.all %}
+    <div class="success-item">
+      <span>{{ item.product_name }} {% if item.size %}({{ item.size }}){% endif %}</span>
+      <span>{{ item.quantity }}× ₹{{ item.product_price }} = ₹{{ item.subtotal }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="success-actions">
+    <a href="{% url 'shop' %}" class="btn-primary btn-lg">Continue Shopping</a>
+    <a href="{% url 'home' %}" class="btn-outline btn-lg">Back to Home</a>
+  </div>
+</div>
+{% endblock %}

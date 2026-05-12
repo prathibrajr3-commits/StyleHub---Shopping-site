@@ -1,0 +1,160 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — StyleHub{% endblock %}
+{% block meta_desc %}{{ product.description|truncatewords:20 }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="{% url 'home' %}">Home</a>
+  <i class='bx bx-chevron-right'></i>
+  <a href="{% url 'shop' %}">Shop</a>
+  <i class='bx bx-chevron-right'></i>
+  {% if product.category %}
+  <a href="{% url 'shop' %}?category={{ product.category.slug }}">{{ product.category.name }}</a>
+  <i class='bx bx-chevron-right'></i>
+  {% endif %}
+  <span>{{ product.name }}</span>
+</nav>
+
+<section class="product-detail">
+  <!-- Images -->
+  <div class="product-gallery">
+    <div class="gallery-main">
+      <img id="main-img" src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy">
+      {% if product.discount_percent %}
+      <span class="badge badge--sale badge--large">-{{ product.discount_percent }}%</span>
+      {% endif %}
+    </div>
+    <div class="gallery-thumbs">
+      <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="thumb active" onclick="setMainImg(this)">
+      {% for img in product.extra_images.all %}
+      <img src="{{ img.get_url }}" alt="{{ img.alt_text }}" class="thumb" onclick="setMainImg(this)">
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Details -->
+  <div class="product-detail-info">
+    <p class="product-detail-brand">{{ product.brand }}</p>
+    <h1 class="product-detail-name">{{ product.name }}</h1>
+
+    <div class="product-detail-rating">
+      {% with r=product.rating|floatformat:"0" %}
+      {% for i in "12345" %}
+        {% if forloop.counter <= r|add:"0" %}<i class='bx bxs-star'></i>{% else %}<i class='bx bx-star'></i>{% endif %}
+      {% endfor %}
+      {% endwith %}
+      <span>{{ product.rating }} ({{ product.review_count }} reviews)</span>
+    </div>
+
+    <div class="product-detail-price">
+      <span class="price-main">₹{{ product.price }}</span>
+      {% if product.original_price %}
+      <span class="price-original">₹{{ product.original_price }}</span>
+      <span class="price-save">Save ₹{{ product.original_price|add:"-"|add:product.price|floatformat:"0" }}</span>
+      {% endif %}
+    </div>
+
+    <p class="product-detail-desc">{{ product.description }}</p>
+
+    {% if product.is_in_stock %}
+    <div class="product-detail-options">
+      <!-- Size -->
+      {% if sizes %}
+      <div class="option-group">
+        <label>Size: <strong id="selected-size-label">Select a size</strong></label>
+        <div class="size-options">
+          {% for size in sizes %}
+          <button type="button" class="size-btn" data-size="{{ size }}">{{ size }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Quantity -->
+      <div class="option-group">
+        <label>Quantity:</label>
+        <div class="qty-control">
+          <button type="button" class="qty-btn" id="qty-minus" onclick="changeQty(-1)">−</button>
+          <input type="number" id="qty-input" value="1" min="1" max="{{ product.stock }}" readonly>
+          <button type="button" class="qty-btn" id="qty-plus" onclick="changeQty(1)">+</button>
+        </div>
+        <span class="stock-info">{{ product.stock }} in stock</span>
+      </div>
+
+      <button class="btn-primary btn-add-cart btn-lg"
+        id="add-to-cart-btn"
+        data-product-id="{{ product.id }}"
+        data-requires-size="{% if sizes %}true{% else %}false{% endif %}">
+        <i class='bx bx-cart-add'></i> Add to Cart
+      </button>
+    </div>
+    {% else %}
+    <div class="out-of-stock-msg">
+      <i class='bx bx-x-circle'></i> Out of Stock — check back soon.
+    </div>
+    {% endif %}
+
+    <div class="product-meta">
+      <p><i class='bx bx-package'></i> Free shipping on orders above ₹500</p>
+      <p><i class='bx bx-refresh'></i> 7-day easy returns</p>
+      <p><i class='bx bx-shield-check'></i> 100% secure payment</p>
+    </div>
+  </div>
+</section>
+
+<!-- Related Products -->
+{% if related_products %}
+<section class="section products-section">
+  <div class="section-header"><h2>You May Also Like</h2></div>
+  <div class="products-grid">
+    {% for product in related_products %}
+    {% include 'store/partials/product_card.html' %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const requiresSize = document.getElementById('add-to-cart-btn')?.dataset.requiresSize === 'true';
+let selectedSize = '';
+
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    selectedSize = this.dataset.size;
+    document.getElementById('selected-size-label').textContent = selectedSize;
+  });
+});
+
+function changeQty(delta) {
+  const input = document.getElementById('qty-input');
+  const max = parseInt(input.max);
+  let val = parseInt(input.value) + delta;
+  if (val < 1) val = 1;
+  if (val > max) val = max;
+  input.value = val;
+}
+
+document.getElementById('add-to-cart-btn')?.addEventListener('click', function() {
+  if (requiresSize && !selectedSize) {
+    showToast('Please select a size', 'error');
+    return;
+  }
+  const productId = this.dataset.productId;
+  const qty = parseInt(document.getElementById('qty-input').value);
+  addToCart(productId, qty, selectedSize);
+});
+
+function setMainImg(thumb) {
+  document.getElementById('main-img').src = thumb.src;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+</script>
+{% endblock %}

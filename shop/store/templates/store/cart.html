@@ -1,0 +1,141 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart — StyleHub{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <h2>Your Cart</h2>
+  <p>{% if not cart.is_empty %}{{ cart.total_items }} item{{ cart.total_items|pluralize }} in your bag{% else %}Your cart is empty{% endif %}</p>
+</section>
+
+<div class="cart-layout">
+  {% if not cart.is_empty %}
+  <!-- Cart Items -->
+  <div class="cart-items" id="cart-items">
+    <div class="cart-table-head">
+      <span>Product</span>
+      <span>Price</span>
+      <span>Quantity</span>
+      <span>Subtotal</span>
+      <span></span>
+    </div>
+
+    {% for item in cart.items.select_related %}
+    <div class="cart-row" id="cart-row-{{ item.id }}" data-item-id="{{ item.id }}">
+      <div class="cart-product">
+        <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" loading="lazy">
+        <div>
+          <a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name }}</a>
+          {% if item.size %}<span class="cart-size">Size: {{ item.size }}</span>{% endif %}
+          <span class="cart-brand">{{ item.product.brand }}</span>
+        </div>
+      </div>
+      <span class="cart-price">₹{{ item.product.price }}</span>
+      <div class="cart-qty-control">
+        <button onclick="updateCartItem({{ item.id }}, {{ item.quantity }} - 1)">−</button>
+        <span id="qty-{{ item.id }}">{{ item.quantity }}</span>
+        <button onclick="updateCartItem({{ item.id }}, {{ item.quantity }} + 1)">+</button>
+      </div>
+      <span class="cart-subtotal" id="subtotal-{{ item.id }}">₹{{ item.subtotal }}</span>
+      <button class="cart-remove-btn" onclick="removeCartItem({{ item.id }})" aria-label="Remove">
+        <i class='bx bx-trash'></i>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="cart-sidebar">
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span id="cart-total">₹{{ cart.total_price }}</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span id="shipping-cost">{% if cart.total_price >= 500 %}Free{% else %}₹49{% endif %}</span>
+      </div>
+      <div class="summary-row summary-row--total">
+        <strong>Total</strong>
+        <strong id="final-total">
+          ₹{% if cart.total_price >= 500 %}{{ cart.total_price }}{% else %}{{ cart.total_price|add:"49" }}{% endif %}
+        </strong>
+      </div>
+      <a href="{% url 'checkout' %}" class="btn-primary btn-block btn-lg">Proceed to Checkout</a>
+      <a href="{% url 'shop' %}" class="btn-outline btn-block">Continue Shopping</a>
+    </div>
+
+    <div class="coupon-box">
+      <h4>Have a coupon?</h4>
+      <div class="coupon-input">
+        <input type="text" id="coupon-code" placeholder="Enter code">
+        <button class="btn-primary" onclick="applyCoupon()">Apply</button>
+      </div>
+      <p class="coupon-hint">Try: <strong>FIRST10</strong> for 10% off</p>
+    </div>
+  </aside>
+
+  {% else %}
+  <!-- Empty cart -->
+  <div class="empty-cart">
+    <div class="empty-cart-icon"><i class='bx bx-cart'></i></div>
+    <h3>Your cart is empty</h3>
+    <p>Looks like you haven't added anything yet. Let's change that.</p>
+    <a href="{% url 'shop' %}" class="btn-primary btn-lg">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function updateCartItem(itemId, newQty) {
+  const res = await fetch('/api/cart/update/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify({item_id: itemId, quantity: newQty})
+  });
+  const data = await res.json();
+  if (data.success) {
+    if (data.removed) {
+      document.getElementById('cart-row-' + itemId)?.remove();
+    } else {
+      document.getElementById('qty-' + itemId).textContent = newQty;
+      document.getElementById('subtotal-' + itemId).textContent = '₹' + data.item_subtotal;
+    }
+    document.getElementById('cart-total').textContent = '₹' + data.cart_total;
+    updateCartBadge(data.cart_count);
+    if (data.cart_count === 0) location.reload();
+  }
+}
+
+async function removeCartItem(itemId) {
+  const row = document.getElementById('cart-row-' + itemId);
+  row.style.opacity = '0.4';
+  const res = await fetch('/api/cart/remove/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+    body: JSON.stringify({item_id: itemId})
+  });
+  const data = await res.json();
+  if (data.success) {
+    row.remove();
+    document.getElementById('cart-total').textContent = '₹' + data.cart_total;
+    updateCartBadge(data.cart_count);
+    if (data.cart_count === 0) location.reload();
+    showToast('Item removed', 'info');
+  }
+}
+
+function applyCoupon() {
+  const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+  if (code === 'FIRST10') {
+    showToast('Coupon FIRST10 applied! 10% discount added.', 'success');
+  } else {
+    showToast('Invalid coupon code.', 'error');
+  }
+}
+</script>
+{% endblock %}

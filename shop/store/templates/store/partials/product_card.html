@@ -1,0 +1,36 @@
+{% load static %}
+<div class="product-card">
+  {% if product.discount_percent %}
+  <span class="badge badge--sale">-{{ product.discount_percent }}%</span>
+  {% endif %}
+  {% if product.is_new_arrival %}
+  <span class="badge badge--new">New</span>
+  {% endif %}
+  <a href="{% url 'product_detail' product.slug %}" class="product-img-link">
+    <img src="{{ product.get_image_url }}" alt="{{ product.name }}" loading="lazy" class="product-img">
+  </a>
+  <div class="product-info">
+    <span class="product-brand">{{ product.brand }}</span>
+    <h3 class="product-name"><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h3>
+    <div class="product-rating">
+      {% with rating=product.rating|floatformat:"0" %}
+      {% for i in "12345" %}
+        {% if forloop.counter <= rating|add:"0" %}<i class='bx bxs-star'></i>{% else %}<i class='bx bx-star'></i>{% endif %}
+      {% endfor %}
+      {% endwith %}
+      <span>({{ product.review_count }})</span>
+    </div>
+    <div class="product-price-row">
+      <span class="product-price">₹{{ product.price }}</span>
+      {% if product.original_price %}
+      <span class="product-original-price">₹{{ product.original_price }}</span>
+      {% endif %}
+    </div>
+  </div>
+  <button class="add-to-cart-btn"
+    data-product-id="{{ product.id }}"
+    data-product-name="{{ product.name }}"
+    aria-label="Add {{ product.name }} to cart">
+    <i class='bx bx-cart-add'></i>
+  </button>
+</div>

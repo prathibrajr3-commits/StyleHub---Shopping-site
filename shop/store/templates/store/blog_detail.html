@@ -1,0 +1,37 @@
+{% extends 'store/base.html' %}
+{% block title %}{{ post.title }} — StyleHub Blog{% endblock %}
+{% block content %}
+<article class="blog-detail section">
+  <div class="blog-detail-header">
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Home</a><i class='bx bx-chevron-right'></i>
+      <a href="{% url 'blog' %}">Blog</a><i class='bx bx-chevron-right'></i>
+      <span>{{ post.title|truncatewords:6 }}</span>
+    </nav>
+    <h1>{{ post.title }}</h1>
+    <p class="blog-meta">By <strong>{{ post.author }}</strong> · {{ post.published_at|date:"d F Y" }}</p>
+  </div>
+  <img src="{{ post.image_url }}" alt="{{ post.title }}" class="blog-hero-img" loading="lazy">
+  <div class="blog-content">{{ post.content|safe }}</div>
+</article>
+
+{% if related %}
+<section class="section">
+  <div class="section-header"><h2>More from the Blog</h2></div>
+  <div class="blog-grid blog-grid--compact">
+    {% for p in related %}
+    <article class="blog-card">
+      <a href="{% url 'blog_detail' p.slug %}" class="blog-img-link">
+        <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy">
+      </a>
+      <div class="blog-body">
+        <h2><a href="{% url 'blog_detail' p.slug %}">{{ p.title }}</a></h2>
+        <p>{{ p.excerpt|truncatewords:20 }}</p>
+        <a href="{% url 'blog_detail' p.slug %}" class="read-more">Read <i class='bx bx-right-arrow-alt'></i></a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
