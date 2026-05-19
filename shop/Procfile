@@ -1,1 +1,1 @@
-web: gunicorn shopproject.wsgi
+web: gunicorn nexabank.wsgi:application
